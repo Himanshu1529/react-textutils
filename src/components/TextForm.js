@@ -166,28 +166,28 @@ export default function TextForm(props) {
             rows="12"
           ></textarea>
         </div>
-        <button onClick={handleUpClick} className="btn btn-primary mx-1">
+        <button onClick={handleUpClick} className="btn btn-primary mx-1 mb-1">
           Convert to Uppercase
         </button>
-        <button onClick={handleLoClick} className="btn btn-primary mx-1">
+        <button onClick={handleLoClick} className="btn btn-primary mx-1 mb-1">
           Convert to Lowercase
         </button>
-        <button onClick={speak} className="btn btn-primary mx-1">
+        <button onClick={speak} className="btn btn-primary mx-1 mb-1">
           Speak
         </button>
-        <button onClick={handleInverseClick} className="btn btn-primary mx-1">
+        <button onClick={handleInverseClick} className="btn btn-primary mx-1 mb-1">
           Text Inverse
         </button>
-        <button onClick={handleCapitalise} className="btn btn-primary mx-1">
+        <button onClick={handleCapitalise} className="btn btn-primary mx-1 mb-1">
           Capitalise
         </button>
-        <button onClick={copyText} className="btn btn-primary mx-1">
+        <button onClick={copyText} className="btn btn-primary mx-1 mb-1">
           Copy to Clipboard
         </button>
-        <button onClick={handleClearClick} className="btn btn-primary mx-1">
+        <button onClick={handleClearClick} className="btn btn-primary mx-1 mb-1">
           Clear Text
         </button>
-        <button className="btn btn-primary mx-1" onClick={generatePDF}>
+        <button className="btn btn-primary mx-1 mb-1" onClick={generatePDF}>
           Download PDF
         </button>
       </div>
