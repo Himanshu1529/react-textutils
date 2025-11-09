@@ -2,179 +2,148 @@ import React, { useEffect, useRef, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { jsPDF } from "jspdf";
-
-// Import jQuery and Summernote
-import $ from "jquery";
-import "summernote/dist/summernote-bs4.css";
-import "summernote/dist/summernote-bs4.js";
+import $ from "jquery"; // required for Summernote
 
 export default function TextForm(props) {
   const [text, setText] = useState("");
   const editorRef = useRef(null);
 
-  // Initialize Summernote once
   useEffect(() => {
-    $(editorRef.current).summernote({
-      height: 300,
-      placeholder: "Start typing here...",
-      callbacks: {
-        onChange: function (contents) {
-          setText(contents);
+    if (window.$ && $(editorRef.current).summernote) {
+      $(editorRef.current).summernote({
+        height: 300,
+        placeholder: "Start typing here...",
+        callbacks: {
+          onChange: function (contents) {
+            setText(contents);
+          },
         },
-      },
-    });
+      });
+    } else {
+      console.error("Summernote not loaded properly");
+    }
 
-    // Cleanup on unmount
     return () => {
-      $(editorRef.current).summernote("destroy");
+      if ($(editorRef.current).summernote) {
+        $(editorRef.current).summernote("destroy");
+      }
     };
   }, []);
 
-  const showError = (msg) =>
-    toast.error(msg, { position: "top-right", autoClose: 2000 });
-
-  const showSuccess = (msg) =>
-    toast.success(msg, { position: "top-right", autoClose: 2000 });
+  const getPlainText = () => text.replace(/<[^>]+>/g, "").trim();
 
   const handleUpClick = () => {
-    const plainText = $(editorRef.current).summernote("code").replace(/<[^>]+>/g, "");
-    if (!plainText.trim()) return showError("Please enter text first");
-
-    const newText = plainText.toUpperCase();
-    setText(newText);
-    $(editorRef.current).summernote("code", newText);
-    showSuccess("Converted to Uppercase");
+    const plain = getPlainText();
+    if (!plain) return toast.error("Please enter text first");
+    const upper = plain.toUpperCase();
+    setText(upper);
+    $(editorRef.current).summernote("code", upper);
+    toast.success("Converted to Uppercase");
   };
 
   const handleLoClick = () => {
-    const plainText = $(editorRef.current).summernote("code").replace(/<[^>]+>/g, "");
-    if (!plainText.trim()) return showError("Please enter text first");
-
-    const newText = plainText.toLowerCase();
-    setText(newText);
-    $(editorRef.current).summernote("code", newText);
-    showSuccess("Converted to Lowercase");
+    const plain = getPlainText();
+    if (!plain) return toast.error("Please enter text first");
+    const lower = plain.toLowerCase();
+    setText(lower);
+    $(editorRef.current).summernote("code", lower);
+    toast.success("Converted to Lowercase");
   };
 
   const handleClearClick = () => {
-    const plainText = $(editorRef.current).summernote("code").replace(/<[^>]+>/g, "");
-    if (!plainText.trim()) return showError("No text to clear");
-
-    $(editorRef.current).summernote("code", "");
+    const plain = getPlainText();
+    if (!plain) return toast.error("No text to clear");
     setText("");
-    showSuccess("Text cleared successfully");
+    $(editorRef.current).summernote("code", "");
+    toast.success("Cleared text");
   };
 
   const speak = () => {
-    const plainText = $(editorRef.current).summernote("code").replace(/<[^>]+>/g, "");
-    const msg = new SpeechSynthesisUtterance(plainText);
+    const msg = new SpeechSynthesisUtterance(getPlainText());
     window.speechSynthesis.speak(msg);
   };
 
   const handleInverseClick = () => {
-    const plainText = $(editorRef.current).summernote("code").replace(/<[^>]+>/g, "");
-    const newText = plainText.split("").reverse().join("");
-    setText(newText);
-    $(editorRef.current).summernote("code", newText);
+    const plain = getPlainText().split("").reverse().join("");
+    setText(plain);
+    $(editorRef.current).summernote("code", plain);
   };
 
   const handleCapitalise = () => {
-    const plainText = $(editorRef.current).summernote("code").replace(/<[^>]+>/g, "");
-    if (!plainText.trim()) return showError("Please enter text first");
-
-    const capitalizedText =
-      plainText.charAt(0).toUpperCase() + plainText.slice(1).toLowerCase();
-    setText(capitalizedText);
-    $(editorRef.current).summernote("code", capitalizedText);
-    showSuccess("Capitalized first letter");
+    const plain = getPlainText();
+    if (!plain) return toast.error("Please enter text first");
+    const cap = plain.charAt(0).toUpperCase() + plain.slice(1).toLowerCase();
+    setText(cap);
+    $(editorRef.current).summernote("code", cap);
   };
 
   const copyText = () => {
-    const plainText = $(editorRef.current).summernote("code").replace(/<[^>]+>/g, "");
-    navigator.clipboard.writeText(plainText);
-    showSuccess("Message copied!");
+    navigator.clipboard.writeText(getPlainText());
+    toast.success("Copied to clipboard!");
   };
 
   const generatePDF = () => {
     const doc = new jsPDF();
-    const plainText = $(editorRef.current).summernote("code").replace(/<[^>]+>/g, "");
-    doc.text(plainText, 10, 10);
+    doc.text(getPlainText(), 10, 10);
     doc.save("Text.pdf");
-    showSuccess("PDF downloaded successfully!");
+    toast.success("PDF downloaded!");
   };
 
-  const wordCount = text.replace(/<[^>]+>/g, "").split(/\s+/).filter(Boolean).length;
+  const wordCount = getPlainText().split(/\s+/).filter(Boolean).length;
 
   return (
     <>
       <div
         className="container"
-        style={{
-          color: props.mode === "dark" ? "white" : "black",
-        }}
+        style={{ color: props.mode === "dark" ? "white" : "black" }}
       >
         <h1>{props.heading}</h1>
-
-        {/* Summernote Editor */}
         <div className="mb-3">
-          <div
-            ref={editorRef}
-            id="summernote"
-            style={{
-              backgroundColor: props.mode === "light" ? "white" : "grey",
-              color: props.mode === "dark" ? "white" : "black",
-            }}
-          />
+          <div ref={editorRef} id="summernote" />
         </div>
 
-        {/* Buttons */}
         <button onClick={handleUpClick} className="btn btn-primary mx-1 mb-1">
-          Convert to Uppercase
+          Uppercase
         </button>
         <button onClick={handleLoClick} className="btn btn-primary mx-1 mb-1">
-          Convert to Lowercase
+          Lowercase
         </button>
         <button onClick={speak} className="btn btn-primary mx-1 mb-1">
           Speak
         </button>
         <button onClick={handleInverseClick} className="btn btn-primary mx-1 mb-1">
-          Text Inverse
+          Inverse
         </button>
         <button onClick={handleCapitalise} className="btn btn-primary mx-1 mb-1">
           Capitalise
         </button>
         <button onClick={copyText} className="btn btn-primary mx-1 mb-1">
-          Copy to Clipboard
+          Copy
         </button>
         <button onClick={handleClearClick} className="btn btn-primary mx-1 mb-1">
-          Clear Text
+          Clear
         </button>
-        <button className="btn btn-primary mx-1 mb-1" onClick={generatePDF}>
-          Download PDF
+        <button onClick={generatePDF} className="btn btn-primary mx-1 mb-1">
+          PDF
         </button>
       </div>
 
-      {/* Summary */}
       <div
         className="container my-2"
-        style={{
-          color: props.mode === "dark" ? "white" : "black",
-        }}
+        style={{ color: props.mode === "dark" ? "white" : "black" }}
       >
         <h2>Your Text Summary</h2>
-        <p>
-          {wordCount} words and {text.replace(/<[^>]+>/g, "").length} characters
-        </p>
-        <p>{0.008 * wordCount} minutes reading time</p>
+        <p>{wordCount} words and {getPlainText().length} characters</p>
+        <p>{(0.008 * wordCount).toFixed(2)} minutes read</p>
         <h2>Preview</h2>
         <div
           dangerouslySetInnerHTML={{
-            __html: text.length > 0 ? text : "<em>Enter text to preview</em>",
+            __html: text || "<em>Enter text to preview here...</em>",
           }}
         />
       </div>
-
       <ToastContainer />
     </>
   );
 }
+
