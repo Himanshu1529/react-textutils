@@ -1,5 +1,5 @@
 import "./App.css";
-import About from "./components/About";
+// import About from "./components/About";
 import Navbar from "./components/Navbar";
 import TextForm from "./components/TextForm";
 import React, { useState } from "react";
@@ -34,7 +34,7 @@ function App() {
         {/* Directly render TextForm or About here based on your needs */}
         <TextForm heading="Enter your text to analyze below" mode={mode} />
         {/* If you want to display About instead, simply replace TextForm with About */}
-         <About />
+        {/* <About />*/}
       </div>
     </>
   );
